@@ -7,14 +7,25 @@ import MonthView from "../components/MonthView.astro";
 import ClosureLedger from "../components/ClosureLedger.astro";
 import ContactBand from "../components/ContactBand.astro";
 import SiteFooter from "../components/SiteFooter.astro";
-import { YEAR, closures } from "../lib/calendar";
+import { DAYS, YEAR, calendar, closures } from "../lib/calendar";
 
-const title = `CloudAlgo Calendar ${YEAR}`;
-const description = `The ${closures.length} weekdays CloudAlgo's office is closed in ${YEAR}, with office hours and who to contact during a closure. Add them to your calendar.`;
+const title = `CloudAlgo Holiday Calendar ${YEAR}: Office Closed Days`;
 const site = Astro.site ?? new URL("https://cloudalgo.github.io");
 const url = new URL(Astro.url.pathname, site).href;
 const org = "https://cloudalgo.com/#organization";
+const { start, end } = calendar.hours;
 
+// Name as many of the holidays as fit in a search snippet (about 160 characters)
+const lead = `CloudAlgo's office is closed on ${closures.length} weekdays in ${YEAR}`;
+const tail = `. Open Mon–Fri, ${start}–${end} IST.`;
+const names: string[] = [];
+for (const c of closures) {
+  if (`${lead}, including ${[...names, c.name].join(", ")}${tail}`.length > 160) break;
+  names.push(c.name);
+}
+const description = names.length ? `${lead}, including ${names.join(", ")}${tail}` : `${lead}${tail}`;
+
+// Holidays are closures of the office, so they're marked up as special opening hours, not events
 const jsonLd = {
   "@context": "https://schema.org",
   "@graph": [
@@ -29,6 +40,30 @@ const jsonLd = {
       sameAs: ["https://www.linkedin.com/company/cloudalgo", "https://github.com/cloudalgo", "https://twitter.com/cloudalgo"],
     },
     {
+      "@type": "ProfessionalService",
+      "@id": `${url}#office`,
+      name: "CloudAlgo",
+      url: "https://cloudalgo.com/",
+      image: new URL("og-calendar.jpg", url).href,
+      email: calendar.contact,
+      parentOrganization: { "@id": org },
+      address: { "@type": "PostalAddress", addressLocality: "Jaipur", addressRegion: "Rajasthan", addressCountry: "IN" },
+      openingHoursSpecification: {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: calendar.workweek.map((d) => `https://schema.org/${DAYS[d]}`),
+        opens: start,
+        closes: end,
+      },
+      specialOpeningHoursSpecification: closures.map((c) => ({
+        "@type": "OpeningHoursSpecification",
+        name: c.name,
+        validFrom: c.date,
+        validThrough: c.date,
+        opens: "00:00",
+        closes: "00:00",
+      })),
+    },
+    {
       "@type": "WebPage",
       "@id": `${url}#webpage`,
       url,
@@ -37,15 +72,8 @@ const jsonLd = {
       inLanguage: "en-IN",
       isPartOf: { "@type": "WebSite", url: "https://cloudalgo.com/", name: "CloudAlgo", publisher: { "@id": org } },
       publisher: { "@id": org },
-      mainEntity: {
-        "@type": "ItemList",
-        name: `Days CloudAlgo is closed in ${YEAR}`,
-        itemListElement: closures.map((c, i) => ({
-          "@type": "ListItem",
-          position: i + 1,
-          item: { "@type": "Event", name: `CloudAlgo closed: ${c.name}`, startDate: c.date, endDate: c.date, eventStatus: "https://schema.org/EventScheduled", location: { "@type": "Place", name: "CloudAlgo, India", address: { "@type": "PostalAddress", addressCountry: "IN" } }, organizer: { "@id": org } },
-        })),
-      },
+      about: { "@id": `${url}#office` },
+      primaryImageOfPage: new URL("og-calendar.jpg", url).href,
     },
   ],
 };

@@ -5,7 +5,7 @@ export const settings = {
   timezone: "Asia/Kolkata",
   workweek: [1, 2, 3, 4, 5], // Mon–Fri (0 = Sunday)
   hours: { start: "09:30", end: "18:30" },
-  contact: "support@cloudalgo.com",
+  contact: "contact@cloudalgo.com",
   /** 10 government-mandated holidays plus 2 company holidays, every year. */
   closuresPerYear: 12,
 };
