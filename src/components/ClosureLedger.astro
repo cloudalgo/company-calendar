@@ -1,0 +1,95 @@
+---
+import { MONTHS, YEAR, closures, closuresIn, dow, hoursLabel, toDate } from "../lib/calendar";
+
+const groups = MONTHS.map((name, m) => ({ name, m, list: closuresIn(m) })).filter((g) => g.list.length);
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+---
+
+<section class="sec wrap" id="ledger">
+  <div class="ledger">
+    <aside>
+      <h2>Every closure in {YEAR}</h2>
+      <p>Days the whole company is closed. Plan releases and meetings around them.</p>
+      <dl class="spec">
+        <dt>Closed days left</dt><dd id="l-left">{closures.length}</dd>
+        <dt>Hours</dt><dd>{hoursLabel()} IST</dd>
+        <dt>Working week</dt><dd>Mon–Fri</dd>
+      </dl>
+      <div class="key"><span><i class="k-holiday"></i>Office closed</span></div>
+    </aside>
+    <div>
+      <button class="pasttoggle" id="pasttoggle" type="button" aria-expanded="false" hidden></button>
+      {groups.map(({ name, m, list }) => (
+        <div class="lmonth" data-lmonth={m}>
+          <div class="lmonth-head"><h3>{name}</h3><span class="mono">{plural(list.length, "date")}, {plural(list.length, "working day")} closed</span></div>
+          {list.map((c) => {
+            const d = toDate(c.date);
+            return (
+              <button type="button" class="lrow" data-go={c.date}>
+                <span class="dd">{d.getDate()}<small>{dow(d)}</small></span>
+                <span class="mk"><i class="k-holiday"></i></span>
+                <span>
+                  <span class="nm">{c.name}</span>
+                  <span class="tags"><span class="tag">Office closed</span></span>
+                  {c.note && <span class="nt">{c.note}</span>}
+                </span>
+                <span class="rel" data-rel={c.date}></span>
+              </button>
+            );
+          })}
+        </div>
+      ))}
+      <div class="todayline" id="todayline" hidden><span class="label">Today</span><i></i><div><span class="chip" id="todaychip"></span></div></div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .sec { padding-top: 96px; }
+  .ledger { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 72px; align-items: start; }
+  aside { position: sticky; top: 24px; }
+  aside p { margin-top: 14px; font-size: .9rem; }
+  aside .spec { margin-top: 24px; }
+  aside .key { flex-direction: column; gap: 9px; margin-top: 28px; font-size: .82rem; }
+  .pasttoggle { all: unset; box-sizing: border-box; width: 100%; cursor: pointer; display: flex; justify-content: space-between; gap: 12px; padding: 13px 16px; border: 1.5px solid var(--ink-900); font-weight: 600; font-size: .9rem; color: var(--ink-900); }
+  .pasttoggle :global(.mono) { font-weight: 400; font-size: .78rem; color: var(--ink-400); }
+  .pasttoggle:hover { box-shadow: 4px 4px 0 var(--ink-900); transform: translate(-2px, -2px); }
+  .pasttoggle:focus-visible { outline: 2px solid var(--accent-500); outline-offset: 2px; }
+  .lmonth { margin-top: 40px; }
+  .pasttoggle[hidden] + .lmonth { margin-top: 0; }
+  .lmonth:global(.past) { opacity: .55; }
+  .lmonth-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 10px; border-bottom: var(--rule-strong); }
+  .lmonth-head h3 { font-size: 1.6rem; font-weight: 800; letter-spacing: -.025em; }
+  .lmonth-head .mono { font-size: .75rem; color: var(--ink-300); text-align: right; }
+  .lrow { all: unset; box-sizing: border-box; width: 100%; cursor: pointer; display: grid; grid-template-columns: 76px 28px minmax(0, 1fr) auto; gap: 0 14px; padding: 20px 0; border-bottom: var(--rule); align-items: start; }
+  .lrow:hover .nm { text-decoration: underline; text-decoration-color: var(--accent-500); text-underline-offset: 4px; }
+  .lrow:focus-visible { outline: 2px solid var(--accent-500); outline-offset: 2px; }
+  .dd { text-align: center; font: 700 2rem/1 var(--family-display); color: var(--ink-900); letter-spacing: -.03em; }
+  .dd small { display: block; margin-top: 6px; font: .62rem var(--family-mono); letter-spacing: .14em; color: var(--ink-300); text-transform: uppercase; }
+  .mk { position: relative; align-self: stretch; }
+  .mk::before { content: ""; position: absolute; left: 50%; top: -20px; bottom: -21px; border-left: 1px solid var(--paper-200); }
+  .mk i { position: relative; display: block; width: 11px; height: 11px; margin: 7px auto 0; }
+  .nm { display: block; font: 700 1.1rem/1.25 var(--family-display); color: var(--ink-900); letter-spacing: -.015em; }
+  .tags { display: block; margin-top: 7px; }
+  .tags .tag { margin-left: 0; }
+  .nt { display: block; margin-top: 8px; font-size: .9rem; }
+  .rel { font: .75rem var(--family-mono); color: var(--ink-300); padding-top: 5px; white-space: nowrap; }
+  .lrow:global(.done) { opacity: .6; }
+  .todayline { display: grid; grid-template-columns: 76px 28px minmax(0, 1fr); gap: 0 14px; align-items: center; padding: 14px 0; border-bottom: var(--rule); }
+  .todayline .label { text-align: center; color: var(--ink-900); }
+  .todayline i { display: block; width: 13px; height: 13px; margin: 0 auto; border: 2px solid var(--ink-900); background: var(--paper-000); }
+  .todayline div { display: flex; align-items: center; gap: 12px; }
+  .chip { background: var(--accent-500); color: var(--accent-on); font: 500 .75rem var(--family-mono); padding: 4px 8px; white-space: nowrap; }
+  .todayline div::after { content: ""; flex: 1; height: 1.5px; background: var(--accent-500); }
+
+  @media (max-width: 1000px) {
+    .ledger { grid-template-columns: 1fr; gap: 32px; }
+    aside { position: static; }
+  }
+  @media (max-width: 760px) {
+    .sec { padding-top: 64px; }
+    .lrow { grid-template-columns: 56px 20px minmax(0, 1fr); }
+    .rel { grid-column: 3; padding-top: 6px; }
+    .todayline { grid-template-columns: 56px 20px minmax(0, 1fr); }
+  }
+</style>

@@ -1,0 +1,63 @@
+---
+import "../styles/brand.css";
+
+interface Props {
+  title: string;
+  description: string;
+  jsonLd?: Record<string, unknown>;
+}
+const { title, description, jsonLd } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const site = Astro.site ?? new URL("https://cloudalgo.github.io");
+const canonical = new URL(Astro.url.pathname, site).href;
+const ogImage = new URL(`${base}/og-default.jpg`, site).href;
+const ogAlt = "CloudAlgo: Salesforce work your team can still maintain";
+---
+
+<!doctype html>
+<html lang="en-IN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#f75a41" />
+
+    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+    <link rel="icon" type="image/png" sizes="32x32" href={`${base}/favicon.png`} />
+    <link rel="icon" href={`${base}/favicon.ico`} sizes="any" />
+    <link rel="alternate" type="text/calendar" title="CloudAlgo closures" href={`${base}/calendar.ics`} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="CloudAlgo" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:logo" content="https://cloudalgo.com/logo.svg" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@cloudalgo" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={ogAlt} />
+    {jsonLd && <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@600..900&family=Geist:wght@400..900&family=Geist+Mono:wght@400..500&display=swap"
+    />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

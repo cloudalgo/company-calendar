@@ -1,0 +1,75 @@
+---
+import { YEAR, hoursSentence } from "../lib/calendar";
+---
+
+<div class="wrap" id="top">
+  <section class="hero" aria-live="polite">
+    <div class="card">
+      <div class="card-top"><span class="label">Next day we're closed</span><span class="mono" id="c-date"></span></div>
+      <div class="card-main">
+        <div class="big" id="c-big">–</div>
+        <div><h2 id="c-title"></h2><p id="c-sub"></p></div>
+      </div>
+      <div class="cells" id="c-cells"></div>
+      <div class="card-foot" id="c-foot"></div>
+    </div>
+    <div class="hero-copy">
+      <h1 id="h-title">Our <span class="mark">{YEAR}</span> calendar.</h1>
+      <p class="sub" id="h-sub">{hoursSentence()}</p>
+      <div class="soon">
+        <h3>Coming up</h3>
+        <ol id="soon"></ol>
+      </div>
+    </div>
+  </section>
+</div>
+
+<style is:global>
+  .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 72px; padding: 56px 0 72px; align-items: start; }
+  .card { border: 1.5px solid var(--ink-900); background: var(--paper-000); box-shadow: 8px 8px 0 var(--ink-900); }
+  .card-top { display: flex; justify-content: space-between; gap: 12px; padding: 13px 20px; border-bottom: var(--rule); }
+  .card-top .mono { font-size: .8rem; color: var(--ink-900); }
+  .card-main { display: flex; align-items: flex-end; gap: 22px; padding: 30px 24px; min-height: 196px; }
+  .big { font: 800 clamp(6.5rem, 12vw, 10.5rem)/.78 var(--family-display); letter-spacing: -.06em; color: var(--accent-500); font-variant-numeric: tabular-nums; }
+  .big.roll { animation: roll .45s cubic-bezier(.2, .8, .2, 1); }
+  @keyframes roll { from { transform: translateY(22%); opacity: 0; } }
+  .card-main h2 { font-size: clamp(1.4rem, 2.2vw, 1.875rem); }
+  .card-main p { margin-top: 6px; color: var(--ink-600); font-weight: 500; }
+  .cells { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: var(--rule); }
+  .cells:empty { display: none; }
+  .cells > div { padding: 14px 16px 16px; border-right: var(--rule); min-width: 0; }
+  .cells > div:last-child { border-right: 0; }
+  .cells b { display: block; margin: 6px 0 2px; font: 700 1.4rem/1.1 var(--family-display); color: var(--ink-900); letter-spacing: -.02em; }
+  .cells b.hot { color: var(--accent-500); }
+  .cells small { display: block; font-size: .75rem; line-height: 1.35; color: var(--ink-300); }
+  .card-foot { padding: 12px 20px; border-top: var(--rule); background: var(--paper-100); font-size: .875rem; color: var(--ink-600); }
+  .card-foot:empty { display: none; }
+
+  .hero-copy h1 { font-size: clamp(2.6rem, 5vw, 4.6rem); }
+  .hero-copy .sub { margin-top: 20px; max-width: 46ch; font-size: 1.05rem; }
+  .hero-copy .sub b { color: var(--ink-900); font-weight: 600; }
+  .soon { margin-top: 36px; }
+  .soon h3 { font-size: 1.1rem; padding-bottom: 10px; border-bottom: var(--rule-strong); }
+  .soon ol { list-style: none; margin: 0; padding: 0; }
+  .soon li { display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; gap: 14px; align-items: baseline; padding: 11px 0; border-bottom: var(--rule); }
+  .soon li button { all: unset; cursor: pointer; font-weight: 600; color: var(--ink-900); }
+  .soon li button:hover { text-decoration: underline; text-decoration-color: var(--accent-500); text-underline-offset: 3px; }
+  .soon li button:focus-visible { outline: 2px solid var(--accent-500); outline-offset: 2px; }
+  .soon .when { font: .8rem var(--family-mono); color: var(--ink-900); }
+  .soon .rel { font: .75rem var(--family-mono); color: var(--ink-300); white-space: nowrap; }
+
+  .tag { display: inline-block; margin-left: 8px; padding: 2px 6px; font: 500 .66rem/1.3 var(--family-mono); letter-spacing: .1em; text-transform: uppercase; vertical-align: 2px; white-space: nowrap; background: var(--accent-500); color: var(--accent-on); }
+
+  @media (max-width: 1000px) {
+    .hero { grid-template-columns: 1fr; gap: 36px; }
+  }
+  @media (max-width: 760px) {
+    .hero { padding: 32px 0 40px; }
+    .cells { grid-template-columns: 1fr 1fr; }
+    .cells > div:nth-child(2) { border-right: 0; }
+    .cells > div:nth-child(-n+2) { border-bottom: var(--rule); }
+    .card-main { min-height: 0; }
+    .soon li { grid-template-columns: 64px minmax(0, 1fr); }
+    .soon .rel { grid-column: 2; }
+  }
+</style>

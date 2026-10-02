@@ -1,0 +1,68 @@
+---
+import Base from "../layouts/Base.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import Hero from "../components/Hero.astro";
+import ClosureStrip from "../components/ClosureStrip.astro";
+import MonthView from "../components/MonthView.astro";
+import ClosureLedger from "../components/ClosureLedger.astro";
+import ContactBand from "../components/ContactBand.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import { YEAR, closures } from "../lib/calendar";
+
+const title = `CloudAlgo Calendar ${YEAR}`;
+const description = `The ${closures.length} weekdays CloudAlgo's office is closed in ${YEAR}, with office hours and who to contact during a closure. Add them to your calendar.`;
+const site = Astro.site ?? new URL("https://cloudalgo.github.io");
+const url = new URL(Astro.url.pathname, site).href;
+const org = "https://cloudalgo.com/#organization";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": org,
+      name: "CloudAlgo",
+      url: "https://cloudalgo.com/",
+      logo: "https://cloudalgo.com/logo.svg",
+      email: "sales@cloudalgo.com",
+      address: { "@type": "PostalAddress", addressLocality: "Jaipur", addressRegion: "Rajasthan", addressCountry: "IN" },
+      sameAs: ["https://www.linkedin.com/company/cloudalgo", "https://github.com/cloudalgo", "https://twitter.com/cloudalgo"],
+    },
+    {
+      "@type": "WebPage",
+      "@id": `${url}#webpage`,
+      url,
+      name: title,
+      description,
+      inLanguage: "en-IN",
+      isPartOf: { "@type": "WebSite", url: "https://cloudalgo.com/", name: "CloudAlgo", publisher: { "@id": org } },
+      publisher: { "@id": org },
+      mainEntity: {
+        "@type": "ItemList",
+        name: `Days CloudAlgo is closed in ${YEAR}`,
+        itemListElement: closures.map((c, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          item: { "@type": "Event", name: `CloudAlgo closed: ${c.name}`, startDate: c.date, endDate: c.date, eventStatus: "https://schema.org/EventScheduled", location: { "@type": "Place", name: "CloudAlgo, India", address: { "@type": "PostalAddress", addressCountry: "IN" } }, organizer: { "@id": org } },
+        })),
+      },
+    },
+  ],
+};
+---
+
+<Base title={title} description={description} jsonLd={jsonLd}>
+  <SiteHeader />
+  <main>
+    <Hero />
+    <ClosureStrip />
+    <MonthView />
+    <ClosureLedger />
+  </main>
+  <ContactBand />
+  <SiteFooter />
+</Base>
+
+<script>
+  import "../scripts/calendar.ts";
+</script>

@@ -1,0 +1,54 @@
+---
+import { YEAR, closures, longDate, mon, toDate } from "../lib/calendar";
+---
+
+<section class="sec wrap" id="allowance">
+  <div class="allow">
+    <div class="allow-head">
+      <div>
+        <h3>We're closed on {closures.length} working days in {YEAR}</h3>
+        <p>Plan launches and deadlines around these. Every other Monday to Friday, we're working.</p>
+      </div>
+      <span class="verdict">5-day week, Monday to Friday</span>
+    </div>
+    <div class="strip" style={`--n:${closures.length}`}>
+      {closures.map((c) => {
+        const d = toDate(c.date);
+        return (
+          <button type="button" class="bcell" data-go={c.date} title={`${c.name}, ${longDate(d)}`} aria-label={`${c.name}, ${longDate(d)}`}>
+            <span class="d">{d.getDate()}</span><span class="m">{mon(d)}</span>
+          </button>
+        );
+      })}
+    </div>
+    <div class="brackets" style={`--n:${closures.length}`}>
+      <div style={`grid-column:span ${closures.length}`}><b>{closures.length}</b>Festivals and national days</div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .sec { padding-top: 80px; }
+  .allow { padding-top: 28px; border-top: var(--rule-strong); }
+  .allow-head { display: flex; justify-content: space-between; align-items: end; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; }
+  .allow-head h3 { font-size: clamp(1.5rem, 2.6vw, 2.25rem); font-weight: 800; letter-spacing: -.03em; }
+  .allow-head p { margin-top: 8px; max-width: 60ch; }
+  .verdict { display: inline-flex; align-items: center; gap: 10px; padding: 10px 14px; font: 500 .8rem var(--family-mono); border: 1.5px solid var(--ink-900); color: var(--ink-900); white-space: nowrap; }
+  .strip { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 5px; }
+  .bcell { all: unset; box-sizing: border-box; cursor: pointer; aspect-ratio: 3 / 4; max-width: 100%; display: flex; flex-direction: column; justify-content: space-between; padding: 7px 6px; background: var(--accent-500); border: 1.5px solid var(--accent-500); color: var(--accent-on); font: 500 .62rem/1 var(--family-mono); letter-spacing: .08em; text-transform: uppercase; transition: transform .12s, box-shadow .12s, opacity .2s; }
+  .bcell .d { font: 800 clamp(1rem, 1.7vw, 1.45rem)/1 var(--family-display); letter-spacing: -.03em; text-transform: none; }
+  .bcell:hover, .bcell:focus-visible { transform: translate(-2px, -2px); box-shadow: 3px 3px 0 var(--ink-900); }
+  .bcell:global(.taken) { opacity: .38; }
+  .brackets { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 5px; margin-top: 12px; }
+  .brackets div { border-top: 1.5px solid var(--ink-900); padding-top: 8px; font-size: .78rem; line-height: 1.35; color: var(--ink-500); position: relative; }
+  .brackets div::before, .brackets div::after { content: ""; position: absolute; top: -6px; height: 6px; border-left: 1.5px solid var(--ink-900); }
+  .brackets div::before { left: 0; }
+  .brackets div::after { right: 0; }
+  .brackets b { display: block; font: 700 1rem var(--family-display); color: var(--ink-900); }
+
+  @media (max-width: 760px) {
+    .sec { padding-top: 56px; }
+    .strip { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .brackets { display: none; }
+  }
+</style>

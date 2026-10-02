@@ -1,0 +1,16 @@
+---
+import { calendar } from "../lib/calendar";
+---
+
+<div class="wrap">
+  <footer class="site-footer">
+    <span>Questions? <a href={`mailto:${calendar.contact}`}>{calendar.contact}</a>, or your account manager.</span>
+    <span>North India dates from {calendar.source.name}, updated {calendar.source.synced}. Festival dates follow the lunar calendar and can move by a day.</span>
+  </footer>
+</div>
+
+<style>
+  .site-footer { display: flex; justify-content: space-between; gap: 12px 48px; flex-wrap: wrap; padding-block: 28px 40px; font-size: .8rem; color: var(--ink-300); }
+  span:last-child { max-width: 70ch; }
+  a { color: var(--ink-900); }
+</style>

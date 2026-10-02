@@ -1,0 +1,230 @@
+---
+import { MONTHS, YEAR, closuresIn, dow, hoursLabel, longDate, mon, monthGrid, monthStats, shortDate, toDate } from "../lib/calendar";
+
+const months = MONTHS.map((name, m) => ({ name, m, closures: closuresIn(m), stats: monthStats(m), grid: monthGrid(m) }));
+const two = (n: number) => String(n).padStart(2, "0");
+---
+
+<section class="sec wrap" id="month">
+  <div class="mtabs" id="mtabs" role="tablist" aria-label="Months">
+    {months.map(({ name, m, closures }) => (
+      <button type="button" role="tab" data-month={m} aria-selected={m === 0 ? "true" : "false"} tabindex={m === 0 ? 0 : -1}>
+        <span class="n">{two(m + 1)}</span><span class="m">{name.slice(0, 3)}</span>
+        <span class="pips">{closures.map(() => <i />)}</span>
+      </button>
+    ))}
+  </div>
+
+  <div class="mhead" id="mhead" tabindex="0" aria-label="Month. Use the left and right arrow keys or drag to change month.">
+    <span class="sr" id="mname-sr">{MONTHS[0]} {YEAR}</span>
+    <div class="mtrack" id="mtrack" aria-hidden="true">
+      {months.map(({ name, m }) => <span class:list={["mname", { "is-current": m === 0 }]} data-m={m}><span class="word">{name}</span><sup>{YEAR}</sup></span>)}
+    </div>
+  </div>
+
+  <div class="mbar">
+    <span class="lw">
+      {months.map(({ m, closures }) => (
+        <span data-panel={m} hidden={m !== 0}>
+          {closures.length ? <>Closed: {closures.map((c, i) => <>{i > 0 && ", "}<span class="mono">{shortDate(toDate(c.date))}</span></>)}</> : "Open every weekday this month."}
+        </span>
+      ))}
+    </span>
+    <div class="ctl">
+      <span>Drag the month name or press</span>
+      <button class="arrow" id="mprev" type="button" aria-label="Previous month">←</button>
+      <button class="arrow" id="mnext" type="button" aria-label="Next month">→</button>
+    </div>
+  </div>
+
+  {months.map(({ m, stats }) => (
+    <div class="stats" data-panel={m} hidden={m !== 0}>
+      <div><span class="label">Working days</span><b>{stats.working}</b></div>
+      <div><span class="label">Closed days</span><b>{stats.closed}</b></div>
+      <div><span class="label">Working week</span><b>Mon–Fri</b></div>
+      <div><span class="label">Hours, India time</span><b>{hoursLabel()}</b></div>
+    </div>
+  ))}
+
+  <div class="layout">
+    <div class="gcol">
+      {months.map(({ name, m, grid }) => (
+        <div data-panel={m} hidden={m !== 0}>
+          <div class="glead">
+            <h3>{name} at a glance</h3>
+            <div class="key"><span><i class="k-holiday"></i>Office closed</span><span><i class="k-weekend"></i>Weekend</span></div>
+          </div>
+          <div class="dows" aria-hidden="true"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+          <div class="grid">
+            {grid.map((c) =>
+              c.inMonth ? (
+                <button type="button" class:list={["cell", { wk: c.weekend, closed: c.closure }]} data-day={c.iso} aria-label={`${longDate(c.date)}${c.closure ? `: ${c.closure.name}, office closed` : ""}`}>
+                  <span class="dn"><b>{two(c.date.getDate())}</b><small>Today</small></span>
+                  {c.closure && <span class="lbl">{c.closure.name}</span>}
+                </button>
+              ) : (
+                <span class:list={["cell", "out", { wk: c.weekend }]} aria-hidden="true"><span class="dn">{two(c.date.getDate())}</span></span>
+              ),
+            )}
+          </div>
+        </div>
+      ))}
+
+      {months.map(({ name, m, closures }) => (
+        <div class="mlist-wrap" data-panel={m} hidden={m !== 0}>
+          <div class="mlist-head"><h3>Closures this month</h3><span class="mono">{closures.length} in {name}</span></div>
+          <ul class="mlist">
+            {closures.length ? closures.map((c) => {
+              const d = toDate(c.date);
+              return (
+                <li><button type="button" data-day={c.date}>
+                  <span class="dt">{d.getDate()} {mon(d)}<small>{dow(d)}</small></span>
+                  <span><span class="nm">{c.name}</span>{c.note && <span class="nt">{c.note}</span>}</span>
+                </button></li>
+              );
+            }) : <li class="empty">No closures. We're working every weekday this month.</li>}
+          </ul>
+        </div>
+      ))}
+    </div>
+
+    <div class="dcol">
+      <div class="detail" id="detail" aria-live="polite"></div>
+      <p class="detail-hint">Select any day in the grid to see it here.</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .sec { padding-top: 80px; }
+
+  .mtabs { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); border-top: var(--rule); border-bottom: 1.5px solid var(--ink-900); }
+  .mtabs button { all: unset; cursor: pointer; padding: 9px 10px 8px; border-left: var(--rule); display: flex; flex-direction: column; gap: 3px; }
+  .mtabs button:last-child { border-right: var(--rule); }
+  .n { font: .62rem var(--family-mono); color: var(--ink-300); }
+  .m { font: 700 .95rem var(--family-display); color: var(--ink-900); }
+  .pips { display: flex; gap: 2px; height: 4px; }
+  .pips i { width: 6px; height: 4px; background: var(--accent-500); }
+  .mtabs button[aria-selected="true"] { background: var(--ink-900); }
+  .mtabs button[aria-selected="true"] .m { color: var(--paper-000); }
+  .mtabs button[aria-selected="true"] .n { color: var(--paper-300); }
+  .mtabs button:focus-visible { outline: 2px solid var(--accent-500); outline-offset: -2px; }
+
+  /* Month names on one track: the current one sits on the content edge, the rest run off to the right */
+  .mhead {
+    position: relative; margin-inline: calc(50% - 50vw); padding: 32px 0 8px; overflow: hidden;
+    cursor: grab; user-select: none; -webkit-user-select: none; touch-action: pan-y;
+    -webkit-mask-image: linear-gradient(90deg, transparent calc(var(--gutter) * .4), #000 var(--gutter));
+    mask-image: linear-gradient(90deg, transparent calc(var(--gutter) * .4), #000 var(--gutter));
+  }
+  .mhead:global(.dragging) { cursor: grabbing; }
+  .mhead:focus-visible { outline: none; }
+  .mhead:focus-visible .mname:global(.is-current) .word { outline: 2px solid var(--accent-500); outline-offset: 4px; }
+  .mtrack {
+    display: flex; gap: .32em; width: max-content;
+    font: 800 clamp(4rem, 9vw, 8rem)/.82 var(--family-display); letter-spacing: -.055em;
+    transition: transform 420ms cubic-bezier(.2, .7, .15, 1); will-change: transform;
+  }
+  .mname { display: inline-flex; align-items: flex-start; gap: 10px; color: var(--paper-150); white-space: nowrap; transition: color 300ms; }
+  .word { padding-right: .04em; }
+  .mname sup { font: 500 .9rem var(--family-mono); letter-spacing: .1em; color: var(--paper-150); margin-top: 6px; transition: color 300ms; }
+  .mname:global(.is-current) { color: var(--ink-900); }
+  .mname:global(.is-current) .word { background: linear-gradient(transparent 86%, var(--accent-500) 86%); }
+  .mname:global(.is-current) sup { color: var(--ink-400); }
+
+  .mbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 18px 0 22px; }
+  .lw { font-size: .9rem; color: var(--ink-900); font-weight: 500; }
+  .lw::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 10px; background: var(--accent-500); }
+  .lw .mono { font-size: .82rem; }
+  .ctl { display: flex; align-items: center; gap: 8px; font: .75rem var(--family-mono); color: var(--ink-300); }
+  .arrow { all: unset; cursor: pointer; width: 34px; height: 34px; display: grid; place-items: center; border: 1.5px solid var(--ink-900); color: var(--ink-900); font: 600 1rem var(--family-sans); }
+  .arrow:hover { background: var(--ink-900); color: var(--paper-000); }
+  .arrow:focus-visible { outline: 2px solid var(--accent-500); outline-offset: 2px; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: var(--rule-strong); border-bottom: var(--rule); margin-bottom: 32px; }
+  .stats > div { padding: 12px 16px 14px; border-right: var(--rule); }
+  .stats > div:first-child { padding-left: 0; }
+  .stats > div:last-child { border-right: 0; }
+  .stats b { display: block; margin-top: 4px; font: 800 1.9rem/1 var(--family-display); color: var(--ink-900); letter-spacing: -.03em; }
+
+  /* Grid and the day panel side by side, so the month fits in one screen */
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 340px); gap: 40px; align-items: start; }
+  .glead { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 10px; }
+  .glead h3 { font-size: 1.25rem; }
+  .glead .key { font-size: .75rem; color: var(--ink-400); }
+  .dows, .grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)) repeat(2, minmax(0, .55fr)); }
+  .dows { border-bottom: 1.5px solid var(--ink-900); }
+  .dows span { padding: 6px 10px; font: .66rem var(--family-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-400); }
+  .grid { border-left: var(--rule); }
+  .cell { all: unset; box-sizing: border-box; min-height: 64px; padding: 7px 0 8px; border-right: var(--rule); border-bottom: var(--rule); display: flex; flex-direction: column; gap: 5px; cursor: pointer; position: relative; min-width: 0; }
+  .cell.wk { background: var(--paper-100); }
+  .cell.out { cursor: default; background: none; }
+  .cell.out .dn { color: var(--paper-300); }
+  .cell.closed { background: var(--accent-050); }
+  .dn { padding: 0 10px; font: 500 .8rem/1.4 var(--family-mono); color: var(--ink-900); display: flex; align-items: center; gap: 8px; }
+  .dn b { font-weight: 500; }
+  .dn small { display: none; font-size: .6rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-400); }
+  .cell:global(.today) .dn b { background: var(--ink-900); color: var(--paper-000); padding: 1px 5px; }
+  .cell:global(.today) .dn small { display: inline; }
+  .cell:global(.today) { box-shadow: inset 0 0 0 2px var(--ink-900); }
+  .cell:global(.sel) { box-shadow: inset 0 0 0 2px var(--accent-500); }
+  .cell:global(.today.sel) { box-shadow: inset 0 0 0 2px var(--ink-900), inset 0 0 0 4px var(--accent-500); }
+  .cell:not(.out):hover { background: var(--paper-050); }
+  .cell:focus-visible { outline: 2px solid var(--accent-500); outline-offset: -2px; z-index: 2; }
+  .lbl { display: block; margin: 0 8px; padding: 3px 6px; font: 600 .72rem/1.25 var(--family-sans); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: var(--accent-500); color: var(--accent-on); }
+
+  .mlist-wrap { margin-top: 40px; }
+  .mlist-head { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 12px; border-bottom: var(--rule-strong); }
+  .mlist-head h3 { font-size: 1.25rem; }
+  .mlist-head .mono { font-size: .78rem; color: var(--ink-300); }
+  .mlist { list-style: none; margin: 0; padding: 0; }
+  .mlist li { border-bottom: var(--rule); }
+  .mlist button { all: unset; box-sizing: border-box; width: 100%; cursor: pointer; display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 16px; padding: 12px 0; align-items: baseline; }
+  .mlist button:hover .nm { text-decoration: underline; text-decoration-color: var(--accent-500); text-underline-offset: 3px; }
+  .mlist button:focus-visible { outline: 2px solid var(--accent-500); outline-offset: 2px; }
+  .dt { font: .82rem/1.3 var(--family-mono); color: var(--ink-900); }
+  .dt small { display: block; font-size: .65rem; letter-spacing: .14em; color: var(--ink-300); text-transform: uppercase; }
+  .nm { font: 700 1.05rem var(--family-display); color: var(--ink-900); letter-spacing: -.015em; }
+  .nt { display: block; margin-top: 2px; font-size: .875rem; }
+  .empty { padding: 16px 0; color: var(--ink-400); }
+
+  .dcol { position: sticky; top: 20px; padding-top: 38px; }
+  .detail { border: 1.5px solid var(--ink-900); box-shadow: 6px 6px 0 var(--ink-900); padding: 20px 22px 22px; background: var(--paper-000); }
+  .detail :global(h4) { font-size: 1.4rem; letter-spacing: -.02em; padding-bottom: 12px; border-bottom: var(--rule); }
+  .detail :global(h4 small) { margin-left: 8px; padding: 2px 6px; vertical-align: 4px; font: 500 .62rem var(--family-mono); letter-spacing: .14em; text-transform: uppercase; background: var(--ink-900); color: var(--paper-000); }
+  .detail :global(.row) { padding-top: 14px; }
+  .detail :global(.row .label i) { display: inline-block; width: 10px; height: 10px; }
+  .detail :global(.row .label) { display: flex; align-items: center; gap: 8px; }
+  .detail :global(.row strong) { display: block; margin-top: 4px; font: 700 1.05rem var(--family-display); color: var(--ink-900); }
+  .detail :global(.row p) { font-size: .9rem; margin-top: 2px; }
+  .detail :global(.status) { margin-top: 16px; display: inline-block; padding: 5px 9px; font: 500 .7rem var(--family-mono); letter-spacing: .12em; text-transform: uppercase; }
+  .detail :global(.status.closed) { background: var(--accent-500); color: var(--accent-on); }
+  .detail :global(.status.open) { box-shadow: inset 0 0 0 1.5px var(--ink-900); color: var(--ink-900); }
+  .detail :global(.status.off) { background: var(--paper-150); color: var(--ink-600); }
+  .detail-hint { margin-top: 14px; font-size: .8rem; color: var(--ink-300); }
+
+  @media (prefers-reduced-motion: reduce) { .mtrack, .mname, .mname sup { transition: none; } }
+  @media (max-width: 1000px) {
+    .layout { grid-template-columns: 1fr; }
+    .dcol { position: static; padding-top: 0; }
+  }
+  @media (max-width: 760px) {
+    .sec { padding-top: 56px; }
+    .mtabs { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .mtabs button:nth-child(-n+6) { border-bottom: var(--rule); }
+    .mtrack { font-size: 15.5vw; }
+    .ctl > span { display: none; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .stats > div:nth-child(2) { border-right: 0; }
+    .stats > div:nth-child(3) { padding-left: 0; }
+    .stats > div:nth-child(-n+2) { border-bottom: var(--rule); }
+    .glead .key { display: none; }
+    .dows, .grid { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+    .dows span { padding: 6px; letter-spacing: .06em; }
+    .cell { min-height: 48px; padding: 6px 0; gap: 3px; }
+    .dn { padding: 0 6px; font-size: .72rem; }
+    .cell:global(.today) .dn small { display: none; }
+    .lbl { font-size: 0; height: 5px; padding: 0; margin: 0 5px; }
+    .mlist button { grid-template-columns: 62px minmax(0, 1fr); }
+  }
+</style>
