@@ -6,6 +6,8 @@ export const settings = {
   workweek: [1, 2, 3, 4, 5], // Mon–Fri (0 = Sunday)
   hours: { start: "09:30", end: "18:30" },
   contact: "contact@cloudalgo.com",
+  contactPage: "https://cloudalgo.com/contact/",
+  scheduleMeeting: "https://cloudalgo.com/#schedule",
   /** 10 government-mandated holidays plus 2 company holidays, every year. */
   closuresPerYear: 12,
 };

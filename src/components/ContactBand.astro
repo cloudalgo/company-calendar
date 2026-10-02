@@ -9,11 +9,15 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
     <div>
       <h2>When we're closed</h2>
       <p>Someone still watches for emergencies. Anything that can wait gets picked up on the next working day.</p>
-      <a class="btn" href={`${base}/calendar.ics`}>Add our closures to your calendar</a>
+      <div class="ctas">
+        <a class="btn" href={calendar.scheduleMeeting}>Book a meeting</a>
+        <a class="btn btn-ghost" href={`${base}/calendar.ics`}>Add our closures to your calendar</a>
+      </div>
     </div>
     <dl>
       <div><dt>Urgent production issue</dt><dd>Email <a href={`mailto:${calendar.contact}`}>{calendar.contact}</a> with URGENT in the subject. The on-call engineer replies within 2 hours.</dd></div>
-      <div><dt>Everything else</dt><dd>Answered on the next working day.</dd></div>
+      <div><dt>Everything else</dt><dd>Answered on the next working day. Write to us through the <a href={calendar.contactPage}>contact page</a>.</dd></div>
+      <div><dt>Need a meeting?</dt><dd><a href={calendar.scheduleMeeting}>Pick a time</a> on a working day.</dd></div>
       <div><dt>Planning a release?</dt><dd>Book it at least two working days before a closure, so we're around if anything needs fixing afterwards.</dd></div>
       <div><dt>Normal hours</dt><dd>{hoursSentence()}</dd></div>
     </dl>
@@ -25,8 +29,10 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
   .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 64px; padding-block: 64px; }
   h2 { color: var(--accent-on); }
   p { margin-top: 16px; max-width: 44ch; color: var(--accent-on); font-size: 1.02rem; }
-  .btn { margin-top: 28px; background: var(--accent-on); color: var(--paper-000); border-color: var(--accent-on); }
+  .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+  .btn { background: var(--accent-on); color: var(--paper-000); border-color: var(--accent-on); }
   .btn:hover { box-shadow: 4px 4px 0 var(--paper-000); }
+  .btn-ghost { background: transparent; color: var(--accent-on); }
   .btn:focus-visible { outline-color: var(--accent-on); }
   dl { margin: 0; border-top: 1.5px solid var(--accent-on); }
   dl div { display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr); gap: 20px; padding: 16px 0; border-bottom: 1px solid rgb(17 6 5 / .25); }
